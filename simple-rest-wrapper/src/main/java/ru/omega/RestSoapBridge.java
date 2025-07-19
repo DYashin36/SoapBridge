@@ -26,7 +26,7 @@ public class RestSoapBridge extends HttpServlet {
 
         // Здесь — простейший парсинг ID вручную (или через XML-библиотеку)
         String id = extractId(soapRequest);
-
+        System.out.println("----");
         String soapResponse = generateSoapResponse(id);
 
         resp.setContentType("application/soap+xml; charset=utf-8");
