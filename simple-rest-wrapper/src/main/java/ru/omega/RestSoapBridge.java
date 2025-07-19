@@ -15,7 +15,7 @@ public class RestSoapBridge extends HttpServlet {
         StringBuilder requestBody = new StringBuilder();
         try (BufferedReader reader = req.getReader()) {
             String line;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 requestBody.append(line);
             }
         }
@@ -27,7 +27,12 @@ public class RestSoapBridge extends HttpServlet {
         // Здесь — простейший парсинг ID вручную (или через XML-библиотеку)
         String id = extractId(soapRequest);
         System.out.println("----");
-        String soapResponse = generateSoapResponse(id);
+        String soapResponse = "";
+        if (id.equals("55")) {
+            soapResponse = generateSoapResponse(id);
+        } else {
+            soapResponse = generateErrorResponse();
+        }
 
         resp.setContentType("application/soap+xml; charset=utf-8");
         resp.setStatus(HttpServletResponse.SC_OK);
@@ -45,14 +50,74 @@ public class RestSoapBridge extends HttpServlet {
         return "UNKNOWN";
     }
 
+    private String generateErrorResponse()
+    {
+        String exchangeXml
+                = "<ExchangeXML xmlns=\"http://www.imc-dspace-new.org\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+                + "    <Records>"
+                + "    </Records>"
+                + "</ExchangeXML>";
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                + "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">"
+                + "<soap:Body>"
+                + "<GetRecordsInfoResponse xmlns=\"http://imc.parus-s.ru\">"
+                + exchangeXml
+                + "</GetRecordsInfoResponse>"
+                + "</soap:Body>"
+                + "</soap:Envelope>";
+    }
+
     private String generateSoapResponse(String id) {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">" +
-                "<soap:Body>" +
-                "<GetRecordsInfoResponse xmlns=\"http://imc.parus-s.ru\">" +
-                "<Record><ID>" + id + "</ID></Record>" +
-                "</GetRecordsInfoResponse>" +
-                "</soap:Body>" +
-                "</soap:Envelope>";
+        String exchangeXml
+                = "<ExchangeXML xmlns=\"http://www.imc-dspace-new.org\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+                + "    <Records>"
+                + "        <Contributor><Qualifier>Department</Qualifier><Value/></Contributor>"
+                + "        <Contributor><Qualifier>Other</Qualifier><Value/></Contributor>"
+                + "        <Contributor><Qualifier>Subdepartment</Qualifier><Value/></Contributor>"
+                + "        <Date><Qualifier>Issued</Qualifier><Value>2006</Value></Date>"
+                + "        <Date><Qualifier>Issued</Qualifier><Value/></Date>"
+                + "        <Identifier><Qualifier>Citation</Qualifier><Value>Савицкая, Т.Е. Савицкая, Т.Е. \"Африка внутри нас\" : парадоксы современных процессов визуализации культуры // Обсерватория культуры. - 2006. - № 6. - Текст : непосредственный</Value></Identifier>"
+                + "        <Identifier><Qualifier>Identifier</Qualifier><Value>RU/IS/BASE/234616783</Value></Identifier>"
+                + "        <Identifier><Qualifier>ISBN</Qualifier><Value/></Identifier>"
+                + "        <Identifier><Qualifier>ISMN</Qualifier><Value/></Identifier>"
+                + "        <Identifier><Qualifier>ISSN</Qualifier><Value/></Identifier>"
+                + "        <Identifier><Qualifier>Nps</Qualifier><Value/></Identifier>"
+                + "        <Identifier><Qualifier>Orcid</Qualifier><Value/></Identifier>"
+                + "        <Description><Qualifier>Abstract</Qualifier><Value/></Description>"
+                + "        <Description><Qualifier>FirstPage</Qualifier><Value>30</Value></Description>"
+                + "        <Description><Qualifier>LastPage</Qualifier><Value>35</Value></Description>"
+                + "        <Format><Qualifier>Extent</Qualifier><Value/></Format>"
+                + "        <Format><Qualifier>Mimetype</Qualifier><Value>Text</Value></Format>"
+                + "        <Language><Qualifier>ISO</Qualifier><Value/></Language>"
+                + "        <Publisher><Qualifier/><Value/></Publisher>"
+                + "        <Relation><Qualifier>IsPartOf</Qualifier><Value>Обсерватория культуры</Value></Relation>"
+                + "        <Rights><Qualifier/><Value/></Rights>"
+                + "        <Rights><Qualifier>License</Qualifier><Value/></Rights>"
+                + "        <Rights><Qualifier>Url</Qualifier><Value/></Rights>"
+                + "        <Subject><Qualifier>RuBBK</Qualifier><Value/></Subject>"
+                + "        <Subject><Qualifier>RuGASNTI</Qualifier><Value/></Subject>"
+                + "        <Subject><Qualifier>Subject</Qualifier><Value>ПРЕПОДАВАНИЕ КУЛЬТУРОЛОГИИ</Value></Subject>"
+                + "        <Subject><Qualifier>Subject</Qualifier><Value>ВЫСШЕЕ ОБРАЗОВАНИЕ</Value></Subject>"
+                + "        <Subject><Qualifier>Subject</Qualifier><Value>ВЫСШАЯ ШКОЛА</Value></Subject>"
+                + "        <Subject><Qualifier>UDC</Qualifier><Value/></Subject>"
+                + "        <Title><Qualifier/><Value>\"Африка внутри нас\" : парадоксы современных процессов визуализации культуры</Value></Title>"
+                + "        <Title><Qualifier>Alternative</Qualifier><Value/></Title>"
+                + "        <Type><Qualifier/><Value>Text</Value></Type>"
+                + "        <Thesis><Qualifier>Level</Qualifier><Value/></Thesis>"
+                + "        <Thesis><Qualifier>Speciality</Qualifier><Value/></Thesis>"
+                + "        <Source><Qualifier/><Value>Обсерватория культуры. - 2006. -  № 6. - Текст  : непосредственный</Value></Source>"
+                + "        <Source><Qualifier/><Value/></Source>"
+                + "    </Records>"
+                + "</ExchangeXML>";
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                + "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">"
+                + "<soap:Body>"
+                + "<GetRecordsInfoResponse xmlns=\"http://imc.parus-s.ru\">"
+                + exchangeXml
+                + "</GetRecordsInfoResponse>"
+                + "</soap:Body>"
+                + "</soap:Envelope>";
     }
 }
