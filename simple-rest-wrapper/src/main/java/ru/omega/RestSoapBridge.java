@@ -3,7 +3,6 @@ package ru.omega;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 public class RestSoapBridge extends HttpServlet {
 
@@ -11,7 +10,6 @@ public class RestSoapBridge extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Несмотря на application/json, мы принимаем XML
         StringBuilder requestBody = new StringBuilder();
         try (BufferedReader reader = req.getReader()) {
             String line;
@@ -24,12 +22,14 @@ public class RestSoapBridge extends HttpServlet {
         System.out.println(">> Received Content-Type: " + req.getContentType());
         System.out.println(">> Received SOAP body:\n" + soapRequest);
 
-        // Здесь — простейший парсинг ID вручную (или через XML-библиотеку)
-        String id = extractId(soapRequest);
-        System.out.println("----");
-        String soapResponse = "";
-        if (id.equals("55")) {
-            soapResponse = generateSoapResponse(id);
+        String soapResponse;
+        if (soapRequest.contains("<bibl:GetShortRecordList")) {
+            String searchExpression = extractSearchExpression(soapRequest);
+            System.out.println(">> Parsed SearchExpression: " + searchExpression);
+            soapResponse = generateShortRecordListResponse(searchExpression);
+        } else if (soapRequest.contains("<imc:Codes>")) {
+            String id = extractId(soapRequest);
+            soapResponse = id.equals("55") ? generateSoapResponse(id) : generateErrorResponse();
         } else {
             soapResponse = generateErrorResponse();
         }
@@ -45,10 +45,79 @@ public class RestSoapBridge extends HttpServlet {
         int start = soap.indexOf("<imc:Codes>") + "<imc:Codes>".length();
         int end = soap.indexOf("</imc:Codes>");
         if (start < end && start > 0 && end > 0) {
-            return soap.substring(start, end);
+            return soap.substring(start, end).trim();
         }
         return "UNKNOWN";
     }
+
+    private String extractSearchExpression(String soap) {
+        int start = soap.indexOf("<bibl:SearchExpression>") + "<bibl:SearchExpression>".length();
+        int end = soap.indexOf("</bibl:SearchExpression>");
+        if (start < end && start > 0 && end > 0) {
+            return soap.substring(start, end).trim();
+        }
+        return "";
+    }
+
+    private String generateShortRecordListResponse(String searchExpression) {
+        String recordXml =
+            "  <Records>\n" +
+            "    <Title><Value>История России</Value></Title>\n" +
+            "    <Subject>история</Subject>\n" +
+            "    <Date>2020</Date>\n" +
+            "    <Language>ru</Language>\n" +
+            "    <Coverage><Value>Москва</Value></Coverage>\n" +
+            "    <Creator>Иванов И.И.</Creator>\n" +
+            "  </Records>\n";
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+            "  <soap:Body>\n" +
+            "    <GetShortRecordListResponse xmlns=\"http://www.omega-spb.ru/bibl\">\n" +
+            recordXml +
+            "    </GetShortRecordListResponse>\n" +
+            "  </soap:Body>\n" +
+            "</soap:Envelope>";
+    }
+
+    // private String generateErrorResponse() {
+    //     String exchangeXml =
+    //         "<ExchangeXML xmlns=\"http://www.imc-dspace-new.org\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
+    //         "    <Records>" +
+    //         "    </Records>" +
+    //         "</ExchangeXML>";
+
+    //     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    //         "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+    //         "  <soap:Body>\n" +
+    //         "    <GetRecordsInfoResponse xmlns=\"http://imc.parus-s.ru\">\n" +
+    //         exchangeXml +
+    //         "    </GetRecordsInfoResponse>\n" +
+    //         "  </soap:Body>\n" +
+    //         "</soap:Envelope>";
+    // }
+
+    // private String generateSoapResponse(String id) {
+    //     String exchangeXml =
+    //         "<ExchangeXML xmlns=\"http://www.imc-dspace-new.org\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
+    //         "    <Records>" +
+    //         "        <Title><Qualifier/><Value>\"Африка внутри нас\"</Value></Title>" +
+    //         "        <Date><Qualifier>Issued</Qualifier><Value>2006</Value></Date>" +
+    //         "        <Identifier><Qualifier>Identifier</Qualifier><Value>RU/IS/BASE/234616783</Value></Identifier>" +
+    //         "        <Relation><Qualifier>IsPartOf</Qualifier><Value>Обсерватория культуры</Value></Relation>" +
+    //         "    </Records>" +
+    //         "</ExchangeXML>";
+
+    //     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    //         "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+    //         "  <soap:Body>\n" +
+    //         "    <GetRecordsInfoResponse xmlns=\"http://imc.parus-s.ru\">\n" +
+    //         exchangeXml +
+    //         "    </GetRecordsInfoResponse>\n" +
+    //         "  </soap:Body>\n" +
+    //         "</soap:Envelope>";
+    // }
+
 
     private String generateErrorResponse()
     {
