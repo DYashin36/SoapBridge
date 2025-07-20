@@ -81,7 +81,7 @@ public class RestSoapBridge extends HttpServlet {
             "    <GetShortRecordListResponse xmlns=\"http://www.omega-spb.ru/bibl\">\n" +
             "<m:BiblRecords>"+
             recordXml +
-            "<m:BiblRecords>"+
+            "</m:BiblRecords>"+
             "    </GetShortRecordListResponse>\n" +
             "  </soap:Body>\n" +
             "</soap:Envelope>";
