@@ -65,27 +65,27 @@ public class RestSoapBridge extends HttpServlet {
     }
 
     private String generateShortRecordListResponse(String searchExpression) {
-        String recordXml =
-            "  <Records>\n" +
-            "    <Title><Value>История России</Value></Title>\n" +
-            "    <Subject>история</Subject>\n" +
-            "    <Date>2020</Date>\n" +
-            "    <Language>ru</Language>\n" +
-            "    <Coverage><Value>Москва</Value></Coverage>\n" +
-            "    <Creator>Иванов И.И.</Creator>\n" +
-            "  </Records>\n";
+    String recordXml =
+        "  <Records>\n" +
+        "    <Title><Value>История России</Value></Title>\n" +
+        "    <Subject>история</Subject>\n" +
+        "    <Date>2020</Date>\n" +
+        "    <Language>ru</Language>\n" +
+        "    <Coverage><Value>Москва</Value></Coverage>\n" +
+        "    <Creator>Иванов И.И.</Creator>\n" +
+        "  </Records>\n";
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-    "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
-    "  <soap:Body>\n" +
-    "    <GetShortRecordListResponse xmlns=\"http://www.omega-spb.ru/bibl\" xmlns:m=\"http://www.omega-spb.ru/bibl\">\n" +
-    "      <BiblRecords>\n" +
-             recordXml +
-    "      </BiblRecords>\n" +
-    "    </GetShortRecordListResponse>\n" +
-    "  </soap:Body>\n" +
-    "</soap:Envelope>";
-    }
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+        "  <soap:Body>\n" +
+        "    <GetShortRecordListResponse xmlns=\"http://www.omega-spb.ru/bibl\" xmlns:m=\"http://www.omega-spb.ru/bibl\">\n" +
+        "      <m:BiblRecords>\n" +
+                 recordXml +
+        "      </m:BiblRecords>\n" +
+        "    </GetShortRecordListResponse>\n" +
+        "  </soap:Body>\n" +
+        "</soap:Envelope>";
+}
 
     // private String generateErrorResponse() {
     //     String exchangeXml =
