@@ -67,6 +67,7 @@ public class RestSoapBridge extends HttpServlet {
     private String generateShortRecordListResponse(String searchExpression) {
     String recordXml =
         "  <Records>\n" +
+        "<Id>22</Id>\n" +
         "    <Title><Value>История России</Value></Title>\n" +
         "    <Subject>история</Subject>\n" +
         "    <Date>2020</Date>\n" +
